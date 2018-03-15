@@ -13,7 +13,7 @@ use OpenSSL::X509;
 use OpenSSL::NativeLib;
 use NativeCall;
 # sub BIO_new(OpenSSL::Bio::BIO_METHOD) returns OpaquePointer is native(&gen-lib) {*}
-# sub BIO_s_mem() returns OpenSSL::Bio::BIO_METHOD is native(&gen-lib) {*}
+sub BIO_s_mem() returns OpenSSL::Bio::BIO_METHOD is native(&gen-lib) {*}
 # sub SSL_do_handshake(OpenSSL::SSL::SSL) returns int32 is native(&gen-lib) {*}
 # sub SSL_CTX_set_default_verify_paths(OpenSSL::Ctx::SSL_CTX) is native(&gen-lib) {*}
 # sub SSL_CTX_load_verify_locations(OpenSSL::Ctx::SSL_CTX, Str, Str) returns int32
@@ -284,12 +284,12 @@ class IO::Socket::Async::SSL {
                     OpenSSL::Ctx::SSL_CTX_set_alpn_protos($ctx, $buf, $buf.elems);
                 }
                 my $ssl = OpenSSL::SSL::SSL_new($ctx);
-                my $read-bio = OpenSSL::BIO::BIO_new(OpenSSL::BIO::BIO_s_mem());
-                my $write-bio = OpenSSL::BIO::BIO_new(OpenSSL::BIO::BIO_s_mem());
+                my $read-bio = OpenSSL::Bio::BIO_new(OpenSSL::Bio::BIO_s_mem());
+                my $write-bio = OpenSSL::Bio::BIO_new(OpenSSL::Bio::BIO_s_mem());
                 check($ssl, OpenSSL::SSL::SSL_set_bio($ssl, $read-bio, $write-bio));
                 OpenSSL::SSL::SSL_ctrl($ssl, SSL_CTRL_SET_TLSEXT_HOSTNAME, 0, $host);
                 OpenSSL::SSL::SSL_set_connect_state($ssl);
-                check($ssl, Openssl::SSL::SSL_do_handshake($ssl));
+                check($ssl, OpenSSL::SSL::SSL_do_handshake($ssl));
                 CATCH {
                     OpenSSL::SSL::SSL_free($ssl) if $ssl;
                     OpenSSL::Ctx::SSL_CTX_free($ctx) if $ctx;
@@ -460,8 +460,8 @@ class IO::Socket::Async::SSL {
                 my $accepted-promise = Promise.new;
                 $lib-lock.protect: {
                     my $ssl = OpenSSL::SSL::SSL_new($ctx);
-                    my $read-bio = OpenSSL::BIO::BIO_new(OpenSSL::BIO::BIO_s_mem());
-                    my $write-bio = OpenSSL::BIO::BIO_new(OpenSSL::BIO::BIO_s_mem());
+                    my $read-bio = OpenSSL::Bio::BIO_new(OpenSSL::Bio::BIO_s_mem());
+                    my $write-bio = OpenSSL::Bio::BIO_new(OpenSSL::Bio::BIO_s_mem());
                     check($ssl, OpenSSL::SSL::SSL_set_bio($ssl, $read-bio, $write-bio));
                     OpenSSL::SSL::SSL_set_accept_state($ssl);
                     CATCH {
@@ -850,3 +850,4 @@ class IO::Socket::Async::SSL {
         }
     }
 }
+
